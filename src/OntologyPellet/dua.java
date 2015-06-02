@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -19,29 +19,21 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.util.InferredAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
 import org.semanticweb.owlapi.util.InferredPropertyAssertionGenerator;
-import org.semanticweb.owlapi.util.InferredSubClassAxiomGenerator;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.sun.xml.internal.ws.encoding.HasEncoding;
 
 public class dua {
-	private static String fname= "file:///D:/COLLEGE/TA/Progress/Ontology/ModelUpdateRev3.owl";
 	private static String NS1 = "http://www.semanticweb.org/riri/ontologies/2015/3/untitled-ontology-4";
 	private static String NS = "untitled-ontology-4";
 	
@@ -63,34 +55,38 @@ public class dua {
 		
 		//Create + Load PelletReasoner
 		PelletReasoner reasonerPellet = PelletReasonerFactory.getInstance().createReasoner(ontology);
-
-		//Case(?c), Process(?e), hasProcess(?c, ?e), Complete_Time(?e, ?t2), 
-		//Start_Time(?e, ?t1), subtract(?d, ?t2, ?t1) -> Duration(?e, ?d)
 		
-		OWLClass ConjointTask = factory.getOWLClass(IRI.create("#ConjointTask"));
-		OWLObjectProperty hasResource = factory.getOWLObjectProperty(IRI.create("#hasResource"));
-		OWLDataProperty CT_Id = factory.getOWLDataProperty(IRI.create("#CT_Id"));
+		OWLClass Resource = factory.getOWLClass(IRI.create(NS1 + "#Resource"));
+		//OWLObjectProperty hasResource = factory.getOWLObjectProperty(IRI.create("#hasResource"));
+		OWLDataProperty Role_Name = factory.getOWLDataProperty(IRI.create(NS1 + "#Role_Name"));
+		
 		
 		//get all instances of case class
-		Set<OWLNamedIndividual> individuals = reasonerPellet.getInstances(ConjointTask, false).getFlattened();
-		System.out.println("onyon");
-		for(OWLNamedIndividual ind: individuals){
-			//get the info about this specific individual
-			System.out.println("minyon");
-			Set<OWLLiteral> ct_ids = reasonerPellet.getDataPropertyValues(ind, CT_Id);
-			NodeSet<OWLClass> types = reasonerPellet.getTypes(ind, true);
-			NodeSet<OWLNamedIndividual> res_names = reasonerPellet.getObjectPropertyValues(ind, hasResource);
+		Set<OWLNamedIndividual> individuals = reasonerPellet.getInstances(Resource, false).getFlattened();
+	
+
+		System.out.println("Size of Individuals: " + individuals.size());
+		int i=0;
+		for(OWLNamedIndividual ind: individuals){	
 			
-			String ct_id = ct_ids.iterator().next().getLiteral();
-			System.out.println("CT_ID: " + ct_id);
+			//get the info about this specific individual
+			NodeSet<OWLClass> types = reasonerPellet.getTypes(ind, true);
+			//NodeSet<OWLNamedIndividual> res_names = reasonerPellet.getObjectPropertyValues(ind, hasResource);
+			Set<OWLLiteral> names = reasonerPellet.getDataPropertyValues(ind, Role_Name);
+			
+			Iterator nameIt = names.iterator();
+			while(nameIt.hasNext())
+				System.out.println("Resource Name: " + ((OWLLiteral) nameIt.next()).getLiteral());
 			
 			OWLClass type = types.iterator().next().getRepresentativeElement();
 			System.out.println("Type: " + type);
-			
-			for(Node<OWLNamedIndividual> res_name : res_names){
-				System.out.print(" hasCase" + res_name.getRepresentativeElement().getIRI());
-			}
+			i++;
+			/*if()
+			for(Node<OWLNamedIndividual> name2 : type){
+				System.out.print(" hasName" + name.getRepresentativeElement().getIRI());
+			}*/
 		}
+		System.out.println(i);
 		 
 		
 		boolean consistent = reasonerPellet.isConsistent();
@@ -132,6 +128,5 @@ public class dua {
 		
 		
 		System.out.println("done");
-		
 	}
 }
