@@ -38,6 +38,8 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 public class dua {
 	private static String NS1 = "http://www.semanticweb.org/riri/ontologies/2015/3/untitled-ontology-4";
 	private static String NS = "untitled-ontology-4";
+	private static int ANOMALI = 10;
+	private static int CASE = 40; 
 	
 	public static void main(String[] args) throws OWLOntologyCreationException, OWLOntologyStorageException, FileNotFoundException {
 		System.out.println("Start");		
@@ -67,40 +69,76 @@ public class dua {
 		Set<OWLNamedIndividual> individuals = reasonerPellet.getInstances(Resource, false).getFlattened();
 	
 
-		System.out.println("Size of Individuals: " + individuals.size());
-		int i=0;
-		for(OWLNamedIndividual ind: individuals){	
-			
+		System.out.println("Size of Individuals: " + individuals.size() + "\n");
+		int i=0;		
+
+		int[][] matriks = new int[1200][10];
+		
+		//Array untuk menyimpan daftar nama anomali
+		String[] anomaliNama = {"", "SkipDecision", "SkipSequence", "ThroughputTimeMax", "ThroughputTimeMin", "WrongDecision",
+				"WrongDutyCombine", "WrongDutyDecision", "WrongDutySequence", "WrongPattern", "WrongResource"};
+
+		int j = 1,
+			k = 1;
+		
+		for(OWLNamedIndividual ind: individuals){
 			//get the info about this specific individual
 			NodeSet<OWLClass> types = reasonerPellet.getTypes(ind, true);
 			NodeSet<OWLNamedIndividual> res_names = reasonerPellet.getObjectPropertyValues(ind, hasCase);
-			//Set<OWLLiteral> names = reasonerPellet.getDataPropertyValues(ind, Role_Name);
 			
-			/*Iterator nameIt = names.iterator();
-			while(nameIt.hasNext())
-				System.out.println("Resource Name: " + ((OWLLiteral) nameIt.next()).getLiteral());
-			*/
-			System.out.println(ind.toString());
+			//panjang string individu
+			int indLength = ind.toString().length();
+			String individu = ind.toString().substring(71,(indLength-1));
+			
+			//Print nama individu
+			System.out.println(individu);
+			
+			//Print tipe kelas
 			OWLClass type = types.iterator().next().getRepresentativeElement();
 			System.out.println(" Type: " + type);
 			i++;
 			
+			for(int a=1; a<ANOMALI; i++){
+				if(individu.equals(anomaliNama[i]))
+					System.out.println();
+				else
+					System.out.println();
+			}
+			//Print anomali yang ada
 			if(res_names.isEmpty())
+			{
 				System.out.println(" hasCase: tidak ada");
+				
+				//simpan ke matriks anomali
+				matriks[j][k] = 0;
+			}
 			else{
 				for(Node<OWLNamedIndividual> name : res_names){
-					System.out.println(" hasCase: " + name.getRepresentativeElement().getIRI());
+					String teks = name.getRepresentativeElement().getIRI().toString();
+					int eventNo = Integer.parseInt(teks.substring(79));
+					System.out.println(" hasCase: " + eventNo);
+						
+					//simpan ke matriks anomali
+					matriks[j][k] = 1;
 				}
 			}
+			
+			j++;
+			System.out.println();
 		}
 		System.out.println(i);
-		 
 		
-		boolean consistent = reasonerPellet.isConsistent();
-		System.out.println("Consistent: " + consistent + "\n");
+		for(int m = 1 ; m< CASE; m++)
+		{
+			for(int n=1; n< ANOMALI; n++)
+				System.out.print(matriks[m][n] + " ");
+			System.out.println();
+		}
+		
+		
 
 		//jalankan reasoner
-		reasonerPellet.getKB().realize();
+		//reasonerPellet.getKB().realize();
 		//reasonerPellet.getKB().printClassTree();		
 /*
 		List<InferredAxiomGenerator<? extends OWLAxiom>> axiomGenerators = 
