@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,9 +14,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -28,16 +32,12 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
-import org.semanticweb.owlapi.util.InferredAxiomGenerator;
-import org.semanticweb.owlapi.util.InferredOntologyGenerator;
-import org.semanticweb.owlapi.util.InferredPropertyAssertionGenerator;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasoner;
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 
 public class dua {
 	private static String NS1 = "http://www.semanticweb.org/riri/ontologies/2015/3/untitled-ontology-4";
-	private static String NS = "untitled-ontology-4";
 	private static int ANOMALI = 10;
 	private static int CASE = 1200; 
 	
@@ -68,7 +68,6 @@ public class dua {
 		//ambil semua individu yang ada di kelas tersebut
 		Set<OWLNamedIndividual> individuals = reasonerPellet.getInstances(Resource, false).getFlattened();
 	
-
 		System.out.println("Size of Individuals: " + individuals.size() + "\n");
 		int i=0;		
 
@@ -98,6 +97,7 @@ public class dua {
 			System.out.println(" Type: " + type);
 			i++;
 			
+			//menyimpan index anomali yang sedang dibandingkan
 			for(int a=0; a<ANOMALI; a++){
 				if(individu.equals(anomaliNama[a]))
 					k = a;
@@ -120,7 +120,7 @@ public class dua {
 			
 			System.out.println();
 		}
-		System.out.println(i);
+		System.out.println(j);
 		
 		for(int m = 1 ; m<=j; m++)
 		{
@@ -129,43 +129,32 @@ public class dua {
 			System.out.println();
 		}
 		
-		
-
-		//jalankan reasoner
-		//reasonerPellet.getKB().realize();
-		//reasonerPellet.getKB().printClassTree();		
-/*
-		List<InferredAxiomGenerator<? extends OWLAxiom>> axiomGenerators = 
-				new ArrayList<InferredAxiomGenerator<? extends OWLAxiom>>();
-		axiomGenerators.add(new InferredPropertyAssertionGenerator());
-		
-		
-		OWLOntology infOntology = manager.createOntology();
-		InferredOntologyGenerator iog = new InferredOntologyGenerator(reasonerPellet, axiomGenerators);
-		iog.fillOntology(manager, infOntology);
-		
-		
-		//Save new ontology
-		OutputStream owlOutputStream = new ByteArrayOutputStream();
-		manager.saveOntology(infOntology, owlOutputStream);
-		
-
-		//File untuk menyimpan output
-		File fileO = new File("D:/fileO.txt");
-
-		//Writer untuk menuliskan ke file output 
-		Writer output = null;
-		try {
-			output = new BufferedWriter(new FileWriter(fileO));
-			output.write(owlOutputStream.toString());
-			output.close();
-			owlOutputStream.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		*/
-		
 		System.out.println("done");
+		
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFSheet sheet = workbook.createSheet("fraud");
+		
+		int rownum = 1;
+		for(int data[]:matriks){
+			Row row = sheet.createRow(rownum++);
+			int cellnum = 1;
+			for(int obj:data)
+			{
+				Cell cell = row.createCell(cellnum++);
+				cell.setCellValue(obj);
+			}
+		}
+		try{
+			FileOutputStream out = new FileOutputStream(new File ("D:/fileO.xlsx"));
+			workbook.write(out);
+			out.close();
+			System.out.println("Successfully saved to excel ");
+		}
+		catch (FileNotFoundException e){
+			e.printStackTrace();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 }
