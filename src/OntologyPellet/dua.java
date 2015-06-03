@@ -21,10 +21,12 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.util.InferredAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
@@ -56,12 +58,12 @@ public class dua {
 		//Create + Load PelletReasoner
 		PelletReasoner reasonerPellet = PelletReasonerFactory.getInstance().createReasoner(ontology);
 		
-		OWLClass Resource = factory.getOWLClass(IRI.create(NS1 + "#Resource"));
-		//OWLObjectProperty hasResource = factory.getOWLObjectProperty(IRI.create("#hasResource"));
-		OWLDataProperty Role_Name = factory.getOWLDataProperty(IRI.create(NS1 + "#Role_Name"));
+		OWLClass Resource = factory.getOWLClass(IRI.create(NS1 + "#Anomali"));
+		OWLObjectProperty hasCase = factory.getOWLObjectProperty(IRI.create(NS1 + "#hasCase"));
+		//OWLDataProperty Role_Name = factory.getOWLDataProperty(IRI.create(NS1 + "#Role_Name"));
 		
 		
-		//get all instances of case class
+		//ambil semua individu yang ada di kelas tersebut
 		Set<OWLNamedIndividual> individuals = reasonerPellet.getInstances(Resource, false).getFlattened();
 	
 
@@ -71,20 +73,25 @@ public class dua {
 			
 			//get the info about this specific individual
 			NodeSet<OWLClass> types = reasonerPellet.getTypes(ind, true);
-			//NodeSet<OWLNamedIndividual> res_names = reasonerPellet.getObjectPropertyValues(ind, hasResource);
-			Set<OWLLiteral> names = reasonerPellet.getDataPropertyValues(ind, Role_Name);
+			NodeSet<OWLNamedIndividual> res_names = reasonerPellet.getObjectPropertyValues(ind, hasCase);
+			//Set<OWLLiteral> names = reasonerPellet.getDataPropertyValues(ind, Role_Name);
 			
-			Iterator nameIt = names.iterator();
+			/*Iterator nameIt = names.iterator();
 			while(nameIt.hasNext())
 				System.out.println("Resource Name: " + ((OWLLiteral) nameIt.next()).getLiteral());
-			
+			*/
+			System.out.println(ind.toString());
 			OWLClass type = types.iterator().next().getRepresentativeElement();
-			System.out.println("Type: " + type);
+			System.out.println(" Type: " + type);
 			i++;
-			/*if()
-			for(Node<OWLNamedIndividual> name2 : type){
-				System.out.print(" hasName" + name.getRepresentativeElement().getIRI());
-			}*/
+			
+			if(res_names.isEmpty())
+				System.out.println(" hasCase: tidak ada");
+			else{
+				for(Node<OWLNamedIndividual> name : res_names){
+					System.out.println(" hasCase: " + name.getRepresentativeElement().getIRI());
+				}
+			}
 		}
 		System.out.println(i);
 		 
@@ -94,8 +101,8 @@ public class dua {
 
 		//jalankan reasoner
 		reasonerPellet.getKB().realize();
-		reasonerPellet.getKB().printClassTree();		
-
+		//reasonerPellet.getKB().printClassTree();		
+/*
 		List<InferredAxiomGenerator<? extends OWLAxiom>> axiomGenerators = 
 				new ArrayList<InferredAxiomGenerator<? extends OWLAxiom>>();
 		axiomGenerators.add(new InferredPropertyAssertionGenerator());
@@ -125,7 +132,7 @@ public class dua {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		*/
 		
 		System.out.println("done");
 	}
