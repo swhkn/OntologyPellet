@@ -39,7 +39,7 @@ public class dua {
 	private static String NS1 = "http://www.semanticweb.org/riri/ontologies/2015/3/untitled-ontology-4";
 	private static String NS = "untitled-ontology-4";
 	private static int ANOMALI = 10;
-	private static int CASE = 40; 
+	private static int CASE = 1200; 
 	
 	public static void main(String[] args) throws OWLOntologyCreationException, OWLOntologyStorageException, FileNotFoundException {
 		System.out.println("Start");		
@@ -75,7 +75,7 @@ public class dua {
 		int[][] matriks = new int[1200][10];
 		
 		//Array untuk menyimpan daftar nama anomali
-		String[] anomaliNama = {"", "SkipDecision", "SkipSequence", "ThroughputTimeMax", "ThroughputTimeMin", "WrongDecision",
+		String[] anomaliNama = {"SkipDecision", "SkipSequence", "ThroughputTimeMax", "ThroughputTimeMin", "WrongDecision",
 				"WrongDutyCombine", "WrongDutyDecision", "WrongDutySequence", "WrongPattern", "WrongResource"};
 
 		int j = 1,
@@ -98,39 +98,33 @@ public class dua {
 			System.out.println(" Type: " + type);
 			i++;
 			
-			for(int a=1; a<ANOMALI; i++){
-				if(individu.equals(anomaliNama[i]))
-					System.out.println();
-				else
-					System.out.println();
+			for(int a=0; a<ANOMALI; a++){
+				if(individu.equals(anomaliNama[a]))
+					k = a;
 			}
+			
 			//Print anomali yang ada
 			if(res_names.isEmpty())
-			{
 				System.out.println(" hasCase: tidak ada");
-				
-				//simpan ke matriks anomali
-				matriks[j][k] = 0;
-			}
 			else{
 				for(Node<OWLNamedIndividual> name : res_names){
 					String teks = name.getRepresentativeElement().getIRI().toString();
-					int eventNo = Integer.parseInt(teks.substring(79));
-					System.out.println(" hasCase: " + eventNo);
+					int caseNo = Integer.parseInt(teks.substring(79));
+					System.out.println(" hasCase: " + caseNo);
 						
 					//simpan ke matriks anomali
-					matriks[j][k] = 1;
+					matriks[caseNo][k] = 1;
+					j++;
 				}
 			}
 			
-			j++;
 			System.out.println();
 		}
 		System.out.println(i);
 		
-		for(int m = 1 ; m< CASE; m++)
+		for(int m = 1 ; m<=j; m++)
 		{
-			for(int n=1; n< ANOMALI; n++)
+			for(int n=0; n<ANOMALI; n++)
 				System.out.print(matriks[m][n] + " ");
 			System.out.println();
 		}
