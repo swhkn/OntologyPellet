@@ -91,7 +91,8 @@ public class tiga {
 		String[][] listOfAnomaledCase = new String[50][6];
 
 		
-		
+
+		int j = 0;
 		for(OWLNamedIndividual ind: individuals){
 			//get the info about this specific individual
 			NodeSet<OWLClass> types = reasonerPellet.getTypes(ind, true);
@@ -124,7 +125,6 @@ public class tiga {
 			//Print anomali yang ada
 			String event;
 			int caseNo = 0;
-			int j = 0;
 			
 			if(res_names.isEmpty())
 				System.out.println(" hasCase: tidak ada");
@@ -150,19 +150,37 @@ public class tiga {
 			System.out.println();
 		}
 		
-		PrefixOWLOntologyFormat pm = (PrefixOWLOntologyFormat) manager.getOntologyFormat(ontology);
+		OWLClass Process = factory.getOWLClass(IRI.create(NS1 + "#Process"));
+		OWLObjectProperty hasActivity = factory.getOWLObjectProperty(IRI.create(NS1 + "#hasActivity"));
+		OWLDataProperty Start_Time = factory.getOWLDataProperty(IRI.create(NS1 + "#Start_Time"));
+		OWLDataProperty Complete_Time = factory.getOWLDataProperty(IRI.create(NS1 + "#Complete_Time"));
+
+		Set<OWLNamedIndividual> individualz = reasonerPellet.getInstances(Process, false).getFlattened();
 		
-		pm.setDefaultPrefix(NS1 + "#");
-		
-		System.out.println(pm);
-		for(int x=0; x<1;x++){
-			//OWLNamedIndividual event_id= (OWLNamedIndividual) factory.getOWLAnonymousIndividual(NS1 + "#" + listOfAnomaledCase[x][0]);	
+		for(OWLNamedIndividual ind:individualz){
+			NodeSet<OWLNamedIndividual> process_names = reasonerPellet.getObjectPropertyValues(ind, hasActivity);
+			String individu = ind.toString().substring(71,(ind.toString().length()-1));
+			Set<OWLLiteral> start = reasonerPellet.getDataPropertyValues(ind, Start_Time);
+			Set<OWLLiteral> complete = reasonerPellet.getDataPropertyValues(ind, Complete_Time);
+			for(int x=0; x<=j; x++){
+				System.out.println(" " + listOfAnomaledCase[x][0]);
+				if(individu.equals(listOfAnomaledCase[x][0])){
+					for(Node<OWLNamedIndividual> name : process_names){
+						String teks = name.getRepresentativeElement().getIRI().toString();
+						listOfAnomaledCase[x][3] = teks.substring(teks.indexOf("#")+1);
+						listOfAnomaledCase[x][4] = start.iterator().next().getLiteral();
+						listOfAnomaledCase[x][5] = complete.iterator().next().getLiteral();
+					}
+					break;	
+				}				 
+			}
 		}
 		
+
 		
-		for(int m = 0 ; m<individualSize; m++)
-		{
-			for(int n=0; n<5; n++)
+		
+		for(int m = 0 ; m<individualSize; m++){
+			for(int n=0; n<6; n++)
 				System.out.print(listOfAnomaledCase[m][n] + " ");
 			System.out.println();
 		}
@@ -183,8 +201,7 @@ public class tiga {
 		for(int data[]:matrix){
 			Row row = sheet.createRow(rownum++);
 			int cellnum = 0;
-			for(int obj:data)
-			{
+			for(int obj:data){
 				Cell cell = row.createCell(cellnum++);
 				cell.setCellValue(obj);
 			}
@@ -206,13 +223,10 @@ public class tiga {
 	
 	public static void printMatrixAnomaledCase(int[][] matrix)
 	{
-
-		for(int m = 0 ; m<CASE; m++)
-		{
+		for(int m = 0 ; m<CASE; m++){
 			for(int n=0; n<ANOMALI; n++)
 				System.out.print(matrix[m][n] + " ");
 			System.out.println();
 		}
-		
 	}
 }
