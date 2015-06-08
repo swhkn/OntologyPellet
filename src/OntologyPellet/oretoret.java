@@ -1,6 +1,7 @@
 package OntologyPellet;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class oretoret {
 	public static void main (String args[]){
@@ -24,6 +25,10 @@ public class oretoret {
 			System.out.println(" "+ ee[1].get(i));
 			System.out.println("  "+ ee[2].get(i));
 		}
+		
+		List abc = new ArrayList();
+		List<List<Integer>> coba = new ArrayList();
+		coba.add(new ArrayList<Integer>());
+		coba.get(0).add(1);
 	}
-
 }

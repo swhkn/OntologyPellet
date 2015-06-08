@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +44,11 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 
 public class tiga {
 	private static final String NS1 = "http://www.semanticweb.org/riri/ontologies/2015/3/untitled-ontology-4";
-	private static int ANOMALI = 10;
-	private static int CASE = 100; 
 	private static final String file_OWL = "D:\\COLLEGE\\TA\\EventlogsDebug\\TMax.owl";
 	private static final String output_file = "D:\\COLLEGE\\TA\\Dataset\\fileO.xlsx";
+
+	private static Integer ANOMALI = 10;
+	private static Integer CASE = 100; 
 	
 	public static void main(String[] args) throws OWLOntologyCreationException, OWLOntologyStorageException, FileNotFoundException {
 		System.out.println("Start");		
@@ -74,32 +76,30 @@ public class tiga {
 		//ambil semua individu yang ada di kelas tersebut
 		Set<OWLNamedIndividual> individuals = reasonerPellet.getInstances(Anomali, false).getFlattened();
 		
-		int individualSize = individuals.size();
+		Integer individualSize = individuals.size();
 		System.out.println("Size of Individuals: " + individualSize + "\n");
 		
 		int i=0;		
 
-		//ini diubah dinamis juga
-		//!!!!!!!!!!!!!!!!!!!!!!!
-		int[][] matriks = new int[CASE][ANOMALI];
+		int[][] caseJumlahPelanggaran = new int[CASE][ANOMALI];
+		String[][] dataCT = new String[25][4];
+		String[][] listOfAnomaledCase = new String[50][7];
 		
 		//Array untuk menyimpan daftar nama anomali
 		String[] anomaliNama = {"SkipDecision", "SkipSequence", "ThroughputTimeMax", "ThroughputTimeMin", "WrongDecision",
 				"WrongDutyCombine", "WrongDutyDecision", "WrongDutySequence", "WrongPattern", "WrongResource"};
 
 
-		String[][] listOfAnomaledCase = new String[50][6];
-
 		
 
-		int j = 0;
+		Integer j = 0;
 		for(OWLNamedIndividual ind: individuals){
 			//get the info about this specific individual
 			NodeSet<OWLClass> types = reasonerPellet.getTypes(ind, true);
 			NodeSet<OWLNamedIndividual> res_names = reasonerPellet.getObjectPropertyValues(ind, hasCase);
 			
 			//panjang string individu
-			int indLength = ind.toString().length();
+			Integer indLength = ind.toString().length();
 			String individu = ind.toString().substring(71,(indLength-1));
 			
 			//Print nama individu
@@ -110,14 +110,13 @@ public class tiga {
 			System.out.println(" Type: " + type.toString().substring(71));
 			i++;
 			
-			int k=0;
+			int indexAnomali=0;
 			//menyimpan index anomali yang sedang dibandingkan
 			for(int a=0; a<ANOMALI; a++){
 				if(individu.equals(anomaliNama[a])){
-					k = a;
-					System.out.println(anomaliNama[a] + " " + k);
-				}
-					
+					indexAnomali = a;
+					System.out.println(anomaliNama[a] + " " + indexAnomali);
+				}					
 			}
 			
 			//nanti dibenerin bagian substring event, dibuat lebih dinamis di bagian indexOf ("_")
@@ -138,7 +137,7 @@ public class tiga {
 					
 					//simpan ke matriks anomali
 					if(caseNo>0){
-						matriks[caseNo-1][k]++;
+						caseJumlahPelanggaran[caseNo-1][indexAnomali]++;
 						listOfAnomaledCase[j][0] = event;
 						listOfAnomaledCase[j][1] = String.valueOf(caseNo);
 						listOfAnomaledCase[j][2] = teks.substring(79);						
@@ -149,6 +148,9 @@ public class tiga {
 			}	
 			System.out.println();
 		}
+		listOfAnomaledCase[10][1] = "81";
+		listOfAnomaledCase[10][3] = "complete_verification";
+		listOfAnomaledCase[10][4] = "2500";
 		
 		OWLClass Process = factory.getOWLClass(IRI.create(NS1 + "#Process"));
 		OWLObjectProperty hasActivity = factory.getOWLObjectProperty(IRI.create(NS1 + "#hasActivity"));
@@ -163,34 +165,66 @@ public class tiga {
 			Set<OWLLiteral> start = reasonerPellet.getDataPropertyValues(ind, Start_Time);
 			Set<OWLLiteral> complete = reasonerPellet.getDataPropertyValues(ind, Complete_Time);
 			for(int x=0; x<=j; x++){
-				System.out.println(" " + listOfAnomaledCase[x][0]);
 				if(individu.equals(listOfAnomaledCase[x][0])){
 					for(Node<OWLNamedIndividual> name : process_names){
 						String teks = name.getRepresentativeElement().getIRI().toString();
 						listOfAnomaledCase[x][3] = teks.substring(teks.indexOf("#")+1);
-						listOfAnomaledCase[x][4] = start.iterator().next().getLiteral();
-						listOfAnomaledCase[x][5] = complete.iterator().next().getLiteral();
+						int a = Integer.parseInt(complete.iterator().next().getLiteral()) - Integer.parseInt(start.iterator().next().getLiteral());
+						listOfAnomaledCase[x][4] = String.valueOf(a);
 					}
 					break;	
 				}				 
 			}
 		}
 		
-
-		
-		
-		for(int m = 0 ; m<individualSize; m++){
-			for(int n=0; n<6; n++)
-				System.out.print(listOfAnomaledCase[m][n] + " ");
-			System.out.println();
+		//Untuk simpan nama aktivitas dan durasi dari CT
+		OWLClass ConjointTask = factory.getOWLClass(IRI.create(NS1 + "#ConjointTask"));
+		OWLDataProperty Duration = factory.getOWLDataProperty(IRI.create(NS1 + "#Duration"));
+		Set<OWLNamedIndividual> individualx = reasonerPellet.getInstances(ConjointTask, false).getFlattened();
+		int x = 0;
+		for(OWLNamedIndividual ind : individualx){
+			NodeSet<OWLNamedIndividual> process_names = reasonerPellet.getObjectPropertyValues(ind, hasActivity);
+			String individu = ind.toString().substring(71,(ind.toString().length()-1));
+			String cekCT = ind.toString().substring(71,73);
+			if(cekCT.equals("CT")){
+				Set<OWLLiteral> duration = reasonerPellet.getDataPropertyValues(ind, Duration);
+				for(Node<OWLNamedIndividual> name : process_names){
+					dataCT[x][0] = individu;
+					dataCT[x][1] = individu.substring(3);
+					String teks = name.getRepresentativeElement().getIRI().toString();
+					dataCT[x][2] = teks.substring(teks.indexOf("#") + 1);
+					dataCT[x][3] = duration.iterator().next().getLiteral();
+				}
+				x++;
+			}					
 		}
 		
+		printListOfAnomaledCase(listOfAnomaledCase, 11);
+		//printDataCT(dataCT);
 		//printMatrixAnomaledCase(matriks);
-		System.out.println("done");
 		//saveToExcel(matriks);
 		
-		matriks = null;
+		caseJumlahPelanggaran = null;
+		dataCT = null;
+		listOfAnomaledCase = null;
+		
+		List<List<Integer>> duplicates = new ArrayList();
+		
+		for(int z=0; z<1; z++){
+			for(int y=1; y<1; y++){
+				if(z!=y &&
+				   listOfAnomaledCase[z][1].equals(listOfAnomaledCase[y][1]) &&
+				   listOfAnomaledCase[z][3].equals(listOfAnomaledCase[y][3])){
+					duplicates.add(new ArrayList<Integer>());
+					duplicates.get(0).add(z);
+					duplicates.get(0).add(y);
+				}
+			}
+		}
+		List<List<Integer>> taskDuration = new ArrayList();
+		
 	}
+	
 	
 	public static void saveToExcel(int[][] matrix)
 	{
@@ -226,6 +260,24 @@ public class tiga {
 		for(int m = 0 ; m<CASE; m++){
 			for(int n=0; n<ANOMALI; n++)
 				System.out.print(matrix[m][n] + " ");
+			System.out.println();
+		}
+	}
+	
+	public static void printDataCT(String[][] dataCT)
+	{
+		for(int m=0; m<25; m++){
+			for(int n=0; n<4; n++)
+				System.out.print(dataCT[m][n] + " ");
+			System.out.println();
+		}
+	}
+	
+	public static void printListOfAnomaledCase(String[][] list, int idSize)
+	{
+		for(int m = 0 ; m<idSize; m++){
+			for(int n=0; n<7; n++)
+				System.out.print(list[m][n] + " ");
 			System.out.println();
 		}
 	}
