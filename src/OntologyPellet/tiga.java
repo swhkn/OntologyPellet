@@ -92,7 +92,6 @@ public class tiga {
 				"WrongDutyCombine", "WrongDutyDecision", "WrongDutySequence", "WrongPattern", "WrongResource"};
 
 
-		
 
 		Integer j = 0;
 		for(OWLNamedIndividual ind: individuals){
@@ -154,16 +153,15 @@ public class tiga {
 
 		Set<OWLNamedIndividual> individualz = reasonerPellet.getInstances(Process, false).getFlattened();
 		
-		for(OWLNamedIndividual ind:individualz){
-			NodeSet<OWLNamedIndividual> process_names = reasonerPellet.getObjectPropertyValues(ind, hasActivity);
-			String individu = ind.toString().substring(71,(ind.toString().length()-1));
-			Set<OWLLiteral> start = reasonerPellet.getDataPropertyValues(ind, Start_Time);
-			Set<OWLLiteral> complete = reasonerPellet.getDataPropertyValues(ind, Complete_Time);
-			System.out.println("id: " + individu);
-			if(individu.startsWith("Ev")){
-				System.out.println(" individu " + individu);
-				for(int x=0; x<listOfAnomaledCaseTT[0].size(); x++){
-					System.out.println(" anomali " + listOfAnomaledCaseTT[0].get(x));
+		for(int x=0; x<listOfAnomaledCaseTT[0].size(); x++){
+			System.out.println("anomali " + listOfAnomaledCaseTT[0].get(x));
+			for(OWLNamedIndividual ind:individualz){
+				NodeSet<OWLNamedIndividual> process_names = reasonerPellet.getObjectPropertyValues(ind, hasActivity);
+				String individu = ind.toString().substring(71,(ind.toString().length()-1));
+				Set<OWLLiteral> start = reasonerPellet.getDataPropertyValues(ind, Start_Time);
+				Set<OWLLiteral> complete = reasonerPellet.getDataPropertyValues(ind, Complete_Time);
+				if(individu.startsWith("Ev")){
+					System.out.println(" individu " + individu);
 					if(individu.equals(listOfAnomaledCaseTT[0].get(x))){
 						System.out.println("  individu dan anomali sama");
 						for(Node<OWLNamedIndividual> name : process_names){
@@ -173,13 +171,12 @@ public class tiga {
 							listOfAnomaledCaseTT[4].add(String.valueOf(a));
 							System.out.println("  durasi "+ listOfAnomaledCaseTT[4]);
 						}
-						break;	
+						break;
 					}
-					System.out.println();
-				}	
-			}			
-		}
-
+				}
+			}
+			System.out.println();
+		}	
 		listOfAnomaledCaseTT[0].add("Event_81_999");
 		listOfAnomaledCaseTT[1].add("81");
 		listOfAnomaledCaseTT[2].add("999");
@@ -213,21 +210,28 @@ public class tiga {
 		//printMatrixAnomaledCase(matriks);
 		//saveToExcel(matriks);
 		
-		
 		//menyimpan aktivitas yang sama di satu case
-		List<List<Integer>> duplicates = new ArrayList();		
+		List<List<Integer>> duplicates = new ArrayList();
+		int dup=0;
 		for(int z=0; z<listOfAnomaledCaseTT[1].size(); z++){
 			for(int y=1; y<listOfAnomaledCaseTT[1].size(); y++){
 				if(z!=y &&
 				   listOfAnomaledCaseTT[1].get(z).equals(listOfAnomaledCaseTT[1].get(y)) &&
 				   listOfAnomaledCaseTT[3].get(z).equals(listOfAnomaledCaseTT[3].get(y))){
 					duplicates.add(new ArrayList<Integer>());
-					duplicates.get(0).add(z);
-					duplicates.get(0).add(y);
+					duplicates.get(dup).add(z);
+					duplicates.get(dup).add(y);
+					dup++;
 				}
 			}
 		}
 		
+		for(int z=0; z<listOfAnomaledCaseTT[3].size(); z++){
+			System.out.println(z + " "+ listOfAnomaledCaseTT[3].get(z));
+		}
+		for(int z=0; z<duplicates.size(); z++){
+			System.out.println(duplicates.get(z));
+		}
 
 		caseJumlahPelanggaran = null;
 		dataCT = null;
