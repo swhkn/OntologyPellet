@@ -153,25 +153,30 @@ public class tiga {
 						listOfAnomaledCaseTT[0].add(event);
 						listOfAnomaledCaseTT[1].add(String.valueOf(caseNo));
 						listOfAnomaledCaseTT[2].add(teks.substring(79));
-						listOfAnomaledCaseTT[3].add("");
-						listOfAnomaledCaseTT[4].add("");
-						listOfAnomaledCaseTT[5].add("");
+						//listOfAnomaledCaseTT[3].add("");
+						//listOfAnomaledCaseTT[4].add("");
+						//listOfAnomaledCaseTT[5].add("");
 					}
 					j++;
+					
+					
+					
 				}
 			}	
 			System.out.println();
 		}		
+		
 		//printListOfAnomaledCase(listOfAnomaledCaseTT);
 		//printDataCT(dataCT);
 		//printMatrixAnomaledCase(matriks);
 		//saveToExcel(matriks);
 
+		//untuk itung TT
 		
 		getDurationPelanggaran(factory, reasonerPellet, listOfAnomaledCaseTT);
-		//cekDuplikasi(listOfAnomaledCaseTT, duplicates);
-		//countDurationEachActivity(listOfAnomaledCaseTT, duplicates, listCaseActivityDuration);
 		printListOfAnomaledCase(listOfAnomaledCaseTT);
+		cekDuplikasi(listOfAnomaledCaseTT, duplicates);
+		countDurationEachActivity(listOfAnomaledCaseTT, duplicates, listCaseActivityDuration);		
 
 		
 		//Cleaning memory
@@ -180,6 +185,8 @@ public class tiga {
 		listOfAnomaledCaseTT = null;
 		duplicates = null;
 		listCaseActivityDuration = null;
+		
+		System.out.println("Memory cleaned...");
 	}
 	
 	/*
@@ -192,33 +199,95 @@ public class tiga {
 	 */
 	public static void countDurationEachActivity(ArrayList<String>[] listOfAnomaledCaseTT, List<List<Integer>> duplicates, ArrayList<String>[] listCaseActivityDuration)
 	{
-		int index=0;
+		System.out.println("countDurationEachActivity " + duplicates.size());
+		int i=0;
+		int sum2;
+		while(i<duplicates.size()){
+			int sum=0;
+			int size=0;
+			for(int j=0; j<duplicates.get(i).size(); j++){
+				sum+=Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(j)));
+				size++;
+			}
+			sum2 = sum/size;
+			listCaseActivityDuration[0].add(listOfAnomaledCaseTT[1].get(duplicates.get(i).get(0)));
+			listCaseActivityDuration[1].add(listOfAnomaledCaseTT[3].get(duplicates.get(i).get(0)));
+			listCaseActivityDuration[2].add(String.valueOf(sum2));
+			i++;
+		}
+		System.out.println("\nNew Duration for each activity");
+		for(int j=0; j<listCaseActivityDuration[0].size(); j++){
+			System.out.println("case :" + listCaseActivityDuration[0].get(j));
+			System.out.println(" activity: " + listCaseActivityDuration[1].get(j));
+			System.out.println(" duration: " + listCaseActivityDuration[2].get(j));
+		}
+		System.out.println();
+		/*int index=-1;
 		for(int i=0 ; i<duplicates.size();i++){
-			if(!(listOfAnomaledCaseTT[5].get(duplicates.get(i).get(0)).equals("d")) &&
-			   !(listOfAnomaledCaseTT[5].get(duplicates.get(i).get(1)).equals("d"))){
+			//if(listOfAnomaledCaseTT[5].size()!=0 && listOfAnomaledCaseTT[5].size() > duplicates.get(i).get(0)){
+			if(listOfAnomaledCaseTT[5].size()!=0){
+				if(!(listOfAnomaledCaseTT[5].get(duplicates.get(i).get(0)).equals("d"))){
+					//memasukkan nomor case
+					listCaseActivityDuration[0].add(listOfAnomaledCaseTT[1].get(duplicates.get(i).get(0)));
+					
+					//memasukkan nama activity
+					listCaseActivityDuration[1].add(listOfAnomaledCaseTT[3].get(duplicates.get(i).get(0)));
+					
+					//memasukkan total duration yang baru
+					int sum = 0;
+					if(listCaseActivityDuration[2].size() != 0 && listCaseActivityDuration[2].size() > index)
+						sum = Integer.parseInt(listCaseActivityDuration[2].get(index));
+					if(sum!=0){
+						sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(0)));
+						sum = sum/2;
+					}
+					else{
+						sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(0)));
+					}
+					sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(1)));
+					sum = sum/2;
+					listCaseActivityDuration[2].add(String.valueOf(sum));
+					
+					//menandai yang sudah dihitung
+					if(listOfAnomaledCaseTT[5].size() < duplicates.get(i).get(0))
+						for(int x=listOfAnomaledCaseTT[5].size(); x<duplicates.get(i).get(0); x++)
+							listOfAnomaledCaseTT[5].add(x, "");
+		
+					listOfAnomaledCaseTT[5].add(duplicates.get(i).get(0), "d");
+					index++;
+				}
+			}
+			else{
 				//memasukkan nomor case
 				listCaseActivityDuration[0].add(listOfAnomaledCaseTT[1].get(duplicates.get(i).get(0)));
 				
 				//memasukkan nama activity
 				listCaseActivityDuration[1].add(listOfAnomaledCaseTT[3].get(duplicates.get(i).get(0)));
-					
+				
 				//memasukkan total duration yang baru
-				int sum = Integer.parseInt(listCaseActivityDuration[2].get(index));
-				sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(0)));
+				int sum = 0;
+				if(listCaseActivityDuration[2].size() != 0 && listCaseActivityDuration[2].size() > index)
+					sum = Integer.parseInt(listCaseActivityDuration[2].get(index));
+				if(sum!=0){
+					sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(0)));
+					sum = sum/2;
+				}
+				else{
+					sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(0)));
+				}
 				sum += Integer.parseInt(listOfAnomaledCaseTT[4].get(duplicates.get(i).get(1)));
 				sum = sum/2;
 				listCaseActivityDuration[2].add(String.valueOf(sum));
 				
-				//menandai yang sudah dihitung
+				 //menandai yang sudah dihitung
+				if(listOfAnomaledCaseTT[5].size() < duplicates.get(i).get(0))
+					for(int x=listOfAnomaledCaseTT[5].size(); x<duplicates.get(i).get(0); x++)
+						listOfAnomaledCaseTT[5].add(x, null);
+				
 				listOfAnomaledCaseTT[5].add(duplicates.get(i).get(0), "d");
 				index++;
 			}
-		}
-		for(int i=0; i<listCaseActivityDuration[0].size(); i++){
-			System.out.println("case :" + listCaseActivityDuration[0].get(i));
-			System.out.println(" activity: " + listCaseActivityDuration[1].get(i));
-			System.out.println(" duration: " + listCaseActivityDuration[2].get(i));
-		}			
+		}*/
 	}
 	
 	/*
@@ -243,32 +312,33 @@ public class tiga {
 				if(individu.startsWith("Ev")){
 					System.out.println(" individu " + individu);
 					if(individu.equals(listOfAnomaledCaseTT[0].get(x))){
-						System.out.println("  individu dan anomali sama");
+						System.out.println("  ketemu");
 						for(Node<OWLNamedIndividual> name : process_names){
 							String teks = name.getRepresentativeElement().getIRI().toString();
 							listOfAnomaledCaseTT[3].add(x, teks.substring(teks.indexOf("#")+1));							
 							int a = Integer.parseInt(complete.iterator().next().getLiteral()) - Integer.parseInt(start.iterator().next().getLiteral());
 							listOfAnomaledCaseTT[4].add(x, String.valueOf(a));
 							System.out.println("  durasi "+ listOfAnomaledCaseTT[4]);
+							listOfAnomaledCaseTT[5].add(x, "n");
 						}
 						break;
 					}
 				}
 			}
 			System.out.println();
-		}	
+		}
 		listOfAnomaledCaseTT[0].add("Event_81_999");
 		listOfAnomaledCaseTT[1].add("81");
 		listOfAnomaledCaseTT[2].add("999");
 		listOfAnomaledCaseTT[3].add("complete_verification");
 		listOfAnomaledCaseTT[4].add("2500");
-		listOfAnomaledCaseTT[5].add("");
+		listOfAnomaledCaseTT[5].add("n");
 		listOfAnomaledCaseTT[0].add("Event_81_9999");
 		listOfAnomaledCaseTT[1].add("81");
 		listOfAnomaledCaseTT[2].add("9999");
 		listOfAnomaledCaseTT[3].add("complete_verification");
 		listOfAnomaledCaseTT[4].add("500");
-		listOfAnomaledCaseTT[5].add("");
+		listOfAnomaledCaseTT[5].add("n");
 	}
 	
 	/*
@@ -305,26 +375,67 @@ public class tiga {
 	 */
 	public static void cekDuplikasi(ArrayList<String>[] listOfAnomaledCaseTT, List<List<Integer>> duplicates)
 	{
-		System.out.println((listOfAnomaledCaseTT[1].size()/2)+1);
+		System.out.println("\nCek duplikasi start " + listOfAnomaledCaseTT[0].size());
+		int index_dup=-1;
+		for(int h=0; h<listOfAnomaledCaseTT[0].size(); h++){
+			if(!listOfAnomaledCaseTT[5].get(h).equals("m")){
+				index_dup++;
+				duplicates.add(new ArrayList<Integer>());
+				duplicates.get(index_dup).add(h);
+				listOfAnomaledCaseTT[5].set(h, "m");
+			}
+			for(int i=1; i<listOfAnomaledCaseTT[0].size(); i++){
+				if(h<i){
+					if(listOfAnomaledCaseTT[3].get(h).equals(listOfAnomaledCaseTT[3].get(i)) &&
+					   listOfAnomaledCaseTT[1].get(h).equals(listOfAnomaledCaseTT[1].get(i)) &&
+					   !listOfAnomaledCaseTT[5].get(i).equals("m")){
+						duplicates.get(index_dup).add(i);
+						listOfAnomaledCaseTT[5].set(i, "m");
+					}
+				}
+			}
+		}
+		/*//salah
+		System.out.println("Cek duplikasi start " + listOfAnomaledCaseTT[1].size());
 		int dup=0;
 		for(int z=0; z<listOfAnomaledCaseTT[1].size(); z++){
+			boolean flag = false;
 			for(int y=1; y<listOfAnomaledCaseTT[1].size(); y++){
 				if(z!=y &&
 				   z<y &&
 				   listOfAnomaledCaseTT[1].get(z).equals(listOfAnomaledCaseTT[1].get(y)) &&
 				   listOfAnomaledCaseTT[3].get(z).equals(listOfAnomaledCaseTT[3].get(y))
 				   ){
-					duplicates.add(new ArrayList<Integer>());
-					duplicates.get(dup).add(z);
-					duplicates.get(dup).add(y);
-					dup++;
+					if(listOfAnomaledCaseTT[5].size()==0 ||
+					   listOfAnomaledCaseTT[5].size() > z){
+						duplicates.add(new ArrayList<Integer>());
+						duplicates.get(dup).add(z);
+						duplicates.get(dup).add(y);
+						listOfAnomaledCaseTT[5].set(z, "m");
+						listOfAnomaledCaseTT[5].set(y, "m");
+						flag = true;
+					}
+					else{
+						if(!(listOfAnomaledCaseTT[5].get(z).equals("m")) &&
+						   !(listOfAnomaledCaseTT[5].get(y).equals("m"))){
+							duplicates.add(new ArrayList<Integer>());
+							duplicates.get(dup).add(z);
+							duplicates.get(dup).add(y);
+							listOfAnomaledCaseTT[5].set(z, "m");
+							listOfAnomaledCaseTT[5].set(y, "m");
+							flag = true;
+						}							
+					}					   
 				}
 			}
-		}
-
+			if(flag == true) dup++;
+		}*/
+		System.out.println("Index yg ada aktivitas sama di satu case: ");
 		for(int z=0; z<duplicates.size(); z++){
 			System.out.println(duplicates.get(z));
 		}
+		System.out.println("Cek duplikasi selesai");
+		System.out.println();
 	}
 
 	/*
@@ -388,9 +499,8 @@ public class tiga {
 	 */
 	public static void printListOfAnomaledCase(ArrayList<String>[] list)
 	{
-		int m=0;
-		for(int n=0; n<list[m].size(); n++){
-			for(m = 0 ; m<5; m++)
+		for(int n=0; n<list[0].size(); n++){
+			for(int m=0 ; m<6; m++)
 				System.out.print(list[m].get(n) + " ");
 			System.out.println();
 		}
